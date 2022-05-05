@@ -254,6 +254,7 @@ add_executable(
     ${PROJECT_NAME}
     GMS/BasicGMS.cpp
     GMS/HexagonSim.cpp
+    GMS/MitutoyoSim.cpp
     GMS/OGPSmartScopeCNC500.cpp
     GMS/WenzelLH.cpp
     MachineTools/BasicMachineTool.cpp
