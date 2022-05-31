@@ -33,7 +33,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 find_package(open62541 REQUIRED)
 find_package(Open62541Cpp REQUIRED)
-find_package(GTest REQUIRED NO_CMAKE_SYSTEM_PACKAGE_REGISTRY)
+# find_package(GTest REQUIRED NO_CMAKE_SYSTEM_PACKAGE_REGISTRY)
 find_package(nlohmann_json REQUIRED)
 
 find_package(ReflCpp REQUIRED)
@@ -277,8 +277,8 @@ target_link_libraries(
                            ua_gen_gms
 )
 
-add_subdirectory(tests)
-include(CTest)
+# add_subdirectory(tests)
+# include(CTest)
 
 include(GenerateExportHeader)
 
@@ -294,3 +294,7 @@ install(
     INCLUDES
     DESTINATION include
 )
+
+include(GNUInstallDirs)
+
+install(EXPORT ${PROJECT_NAME}Targets NAMESPACE ${PROJECT_NAME}:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}Config.cmake)
