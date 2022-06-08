@@ -44,7 +44,9 @@ if(NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set(PROJECT_BINARY_DIR ${CMAKE_BINARY_DIR})
 endif()
 
-set(SAMPLESERVER_GENERATED_NODESET_AND_DATATYPES_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/src_generated")
+set(SAMPLESERVER_GENERATED_NODESET_AND_DATATYPES_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated/src_generated")
+set(SAMPLESERVER_DUMMY_INCLUDE_DIR "${SAMPLESERVER_GENERATED_NODESET_AND_DATATYPES_OUTPUT_DIR}/dummy")
+file(MAKE_DIRECTORY "${SAMPLESERVER_DUMMY_INCLUDE_DIR}")
 
 # Generate types and namespace for DI
 ua_generate_nodeset_and_datatypes(
@@ -246,11 +248,12 @@ target_link_libraries(SampleServerLib PUBLIC Open62541Cpp::Open62541Cpp)
 target_link_libraries(SampleServerLib PUBLIC reflCpp::reflCpp)
 target_link_libraries(SampleServerLib PUBLIC Threads::Threads)
 target_compile_definitions(SampleServerLib PUBLIC __STDC_WANT_LIB_EXT1__)
+target_include_directories(SampleServerLib PRIVATE "${SAMPLESERVER_DUMMY_INCLUDE_DIR}")
 
 add_library(Configuration Configuration/Configuration.cpp Configuration/Configuration_json.cpp)
 target_link_libraries(Configuration PRIVATE nlohmann_json::nlohmann_json)
 
-add_executable(
+add_library(
     ${PROJECT_NAME}
     GMS/BasicGMS.cpp
     GMS/HexagonSim.cpp
@@ -271,6 +274,7 @@ add_executable(
     Woodworking/FullWoodworking.cpp
     Woodworking/InstantiatedWoodworking.cpp
 )
+target_include_directories(${PROJECT_NAME} PRIVATE "${SAMPLESERVER_DUMMY_INCLUDE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(
@@ -286,16 +290,33 @@ include(GenerateExportHeader)
 set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${PROJECT_VERSION})
 
 # export library (either static or shared depending on BUILD_SHARED_LIBS)
-install(
-    TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}Targets
+install(TARGETS ${PROJECT_NAME} SampleServerLib Configuration ua_gen_machinetool ua_gen_robotics ua_gen_woodworking 
+                ua_gen_gms ua_gen_ia ua_gen_machinery ua_gen_di ua_gen_machinery_result
+    EXPORT ${PROJECT_NAME}Config
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
     INCLUDES
-    DESTINATION include
+    DESTINATION include/${PROJECT_NAME}
 )
 
 include(GNUInstallDirs)
 
-install(EXPORT ${PROJECT_NAME}Targets NAMESPACE ${PROJECT_NAME}:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}Config.cmake)
+install(EXPORT ${PROJECT_NAME}Config NAMESPACE ${PROJECT_NAME}:: DESTINATION share/SampleServer)
+
+set(SOURCE_DIRS MachineTools Exceptions GMS OpcUaTypes Robotics TypeDefinition Woodworking Configuration UmatiServerLib arch)
+
+foreach(DIR ${SOURCE_DIRS})
+    install(
+        DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${DIR}"
+        DESTINATION include/SampleServer/
+        FILES_MATCHING
+        PATTERN "*.hpp")
+endforeach()
+
+install(
+    DIRECTORY "${SAMPLESERVER_GENERATED_NODESET_AND_DATATYPES_OUTPUT_DIR}"
+    DESTINATION include/SampleServer/
+    FILES_MATCHING
+    PATTERN "*.h"
+    PATTERN "*dummy" EXCLUDE)
