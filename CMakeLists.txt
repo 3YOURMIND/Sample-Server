@@ -184,47 +184,6 @@ target_sources(
 )
 target_link_libraries(ua_gen_woodworking PUBLIC ua_gen_machinery)
 
-ua_generate_nodeset_and_datatypes(
-    NAME "machinery_result"
-    FILE_NS "${PROJECT_SOURCE_DIR}/model/GMS/Opc.Ua.MachineryResult.NodeSet2.xml"
-    FILE_CSV "${PROJECT_SOURCE_DIR}/model/GMS/Opc.Ua.MachineryResult.NodeSet2.csv"
-    FILE_BSD "${PROJECT_SOURCE_DIR}/model/GMS/Opc.Ua.MachineryResult.NodeSet2.bsd"
-    NAMESPACE_MAP "8:http://opcfoundation.org/UA/Machinery/Result/"
-    TARGET_PREFIX "${PROJECT_NAME}"
-    OUTPUT_DIR "${SAMPLESERVER_GENERATED_NODESET_AND_DATATYPES_OUTPUT_DIR}"
-)
-
-add_library(ua_gen_machinery_result)
-target_sources(
-    ua_gen_machinery_result
-    PRIVATE # cmake-format: sort
-            "${SAMPLESERVER_GENERATED_NODESET_AND_DATATYPES_OUTPUT_DIR}/machinery_result_nodeids.h"
-            ${UA_NODESET_MACHINERY_RESULT_HEADERS}
-            ${UA_NODESET_MACHINERY_RESULT_SOURCES}
-            ${UA_TYPES_MACHINERY_RESULT_HEADERS}
-            ${UA_TYPES_MACHINERY_RESULT_SOURCES}
-)
-target_link_libraries(ua_gen_machinery_result PUBLIC open62541::open62541)
-
-ua_generate_nodeset_and_datatypes(
-    NAME "gms"
-    FILE_NS "${PROJECT_SOURCE_DIR}/model/GMS/opc.ua.gms.nodeset2.xml"
-    FILE_CSV "${PROJECT_SOURCE_DIR}/model/GMS/opc.ua.gms.nodeset2.csv"
-    FILE_BSD "${PROJECT_SOURCE_DIR}/model/GMS/opc.ua.gms.nodeset2.bsd"
-    NAMESPACE_MAP "9:http://opcfoundation.org/GMS/"
-    TARGET_PREFIX "${PROJECT_NAME}"
-    OUTPUT_DIR "${SAMPLESERVER_GENERATED_NODESET_AND_DATATYPES_OUTPUT_DIR}"
-    DEPENDS di ia machinery machinery_result machinetool
-)
-
-add_library(ua_gen_gms)
-target_sources(
-    ua_gen_gms
-    PRIVATE # cmake-format: sort
-            "${SAMPLESERVER_GENERATED_NODESET_AND_DATATYPES_OUTPUT_DIR}/gms_nodeids.h" ${UA_NODESET_GMS_HEADERS}
-            ${UA_NODESET_GMS_SOURCES} ${UA_TYPES_GMS_HEADERS} ${UA_TYPES_GMS_SOURCES}
-)
-target_link_libraries(ua_gen_gms PUBLIC ua_gen_machinetool ua_gen_ia ua_gen_machinery ua_gen_machinery_result)
 
 add_library(
     SampleServerLib
@@ -255,10 +214,6 @@ target_link_libraries(Configuration PRIVATE nlohmann_json::nlohmann_json)
 
 add_library(
     ${PROJECT_NAME}
-    GMS/BasicGMS.cpp
-    GMS/HexagonSim.cpp
-    GMS/OGPSmartScopeCNC500.cpp
-    GMS/WenzelLH.cpp
     MachineTools/BasicMachineTool.cpp
     MachineTools/CNShowcaseMachineTool.cpp
     MachineTools/FullMachineTool.cpp
@@ -279,7 +234,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE "${SAMPLESERVER_DUMMY_INCLUDE
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(
     ${PROJECT_NAME} PUBLIC SampleServerLib Configuration ua_gen_machinetool ua_gen_robotics ua_gen_woodworking
-                           ua_gen_gms
 )
 
 # add_subdirectory(tests)
@@ -291,7 +245,7 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${PROJECT_VERSION})
 
 # export library (either static or shared depending on BUILD_SHARED_LIBS)
 install(TARGETS ${PROJECT_NAME} SampleServerLib Configuration ua_gen_machinetool ua_gen_robotics ua_gen_woodworking 
-                ua_gen_gms ua_gen_ia ua_gen_machinery ua_gen_di ua_gen_machinery_result
+                 ua_gen_ia ua_gen_machinery ua_gen_di 
     EXPORT ${PROJECT_NAME}Config
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
@@ -304,7 +258,7 @@ include(GNUInstallDirs)
 
 install(EXPORT ${PROJECT_NAME}Config NAMESPACE ${PROJECT_NAME}:: DESTINATION share/SampleServer)
 
-set(SOURCE_DIRS MachineTools Exceptions GMS OpcUaTypes Robotics TypeDefinition Woodworking Configuration UmatiServerLib arch)
+set(SOURCE_DIRS MachineTools Exceptions OpcUaTypes Robotics TypeDefinition Woodworking Configuration UmatiServerLib arch)
 
 foreach(DIR ${SOURCE_DIRS})
     install(

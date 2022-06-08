@@ -40,10 +40,6 @@
 #include <vector>
 
 #include "Configuration/Configuration_json.hpp"
-#include "GMS/BasicGMS.hpp"
-#include "GMS/HexagonSim.hpp"
-#include "GMS/OGPSmartScopeCNC500.hpp"
-#include "GMS/WenzelLH.hpp"
 #include "MachineTools/BasicMachineTool.hpp"
 #include "MachineTools/CNShowcaseMachineTool.hpp"
 #include "MachineTools/FullMachineTool.hpp"
@@ -55,10 +51,8 @@
 #include "Woodworking/BasicWoodworking.hpp"
 #include "Woodworking/FullWoodworking.hpp"
 #include "src_generated/namespace_di_generated.h"
-#include "src_generated/namespace_gms_generated.h"
 #include "src_generated/namespace_ia_generated.h"
 #include "src_generated/namespace_machinery_generated.h"
-#include "src_generated/namespace_machinery_result_generated.h"
 #include "src_generated/namespace_machinetool_generated.h"
 
 /*#include "src_generated/namespace_robotics_generated.h"*/
@@ -220,8 +214,6 @@ int main(int argc, char *argv[]) {
   UA_Server_addNamespace(pServer, "Need for namespace index");
   /*namespace_robotics_generated(pServer);*/
   namespace_woodworking_generated(pServer);
-  namespace_machinery_result_generated(pServer);
-  namespace_gms_generated(pServer);
   std::mutex accessDataMutex;
 
   std::list<std::shared_ptr<SimulatedInstance>> machineTools;
@@ -234,7 +226,6 @@ int main(int argc, char *argv[]) {
   /*machineTools.push_back(std::make_shared<BasicRobot>(pServer));*/
   machineTools.push_back(std::make_shared<BasicWoodworking>(pServer));
   machineTools.push_back(std::make_shared<FullWoodworking>(pServer));
-  machineTools.push_back(std::make_shared<BasicGMS>(pServer));
   machineTools.push_back(std::make_shared<HexagonSim>(pServer));
   machineTools.push_back(std::make_shared<OGPSmartScopeCNC500>(pServer));
   machineTools.push_back(std::make_shared<WenzelLH>(pServer));
