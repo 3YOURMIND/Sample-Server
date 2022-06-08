@@ -224,7 +224,6 @@ add_library(
     MachineTools/SimulatedInstance.cpp
     Robotics/BasicRobot.cpp
     Robotics/InstantiatedRobot.cpp
-    SampleServer.cpp
     Woodworking/BasicWoodworking.cpp
     Woodworking/FullWoodworking.cpp
     Woodworking/InstantiatedWoodworking.cpp
